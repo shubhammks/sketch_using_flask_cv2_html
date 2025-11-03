@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/shubhammlks/sketch_using_flask_cv2_html.git'
+                git branch: 'main', url: 'https://github.com/shubhammks/sketch_using_flask_cv2_html.git'
             }
         }
 
