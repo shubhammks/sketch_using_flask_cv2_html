@@ -1,5 +1,7 @@
-from flask import Flask, request, render_template as rt
-import cv2,numpy as np
+from flask import Flask, request, render_template as rt, send_from_directory
+import cv2
+import numpy as np
+import os
 
 app = Flask(__name__)
 
@@ -9,26 +11,37 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-
     image = request.files['image']
-    image.save('/tmp/image.jpg')
 
-    image= cv2.imread('static/image.jpg')
-    gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-    inverted=cv2.bitwise_not(gray)
-    inverted_blur=cv2.GaussianBlur(inverted,(199,199),0)
-    skech=cv2.divide(gray,255-inverted_blur,scale=256)
-    kernal_sharpen=np.array([[-1,-1,-1],
-                            [-1,9,-1],
-                            [-1,-1,-1]])
-    sharp_skech=cv2.filter2D(skech,-1,kernal_sharpen)
+    # Save the uploaded image temporarily
+    upload_path = '/tmp/image.jpg'
+    image.save(upload_path)
 
-    # showimg(sharp_skech)
-    cv2.imwrite('/tmp/final.jpg', sharp_skech)
-    # img="static/image.jpg"
+    # Read and process the image
+    image = cv2.imread(upload_path)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    inverted = cv2.bitwise_not(gray)
+    inverted_blur = cv2.GaussianBlur(inverted, (199, 199), 0)
+    sketch = cv2.divide(gray, 255 - inverted_blur, scale=256)
 
-    return rt('result.html', img1="final.jpg")
+    kernel_sharpen = np.array([
+        [-1, -1, -1],
+        [-1,  9, -1],
+        [-1, -1, -1]
+    ])
+    sharp_sketch = cv2.filter2D(sketch, -1, kernel_sharpen)
 
+    # Save the final image in /tmp
+    output_path = '/tmp/final.jpg'
+    cv2.imwrite(output_path, sharp_sketch)
+
+    # Send to result.html and pass the filename
+    return rt('result.html', img1='final.jpg')
+
+# ✅ Route for serving images from /tmp
+@app.route('/tmp/<filename>')
+def tmp(filename):
+    return send_from_directory('/tmp', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
