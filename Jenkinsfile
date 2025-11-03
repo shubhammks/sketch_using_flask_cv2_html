@@ -2,67 +2,60 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "shubhammlks/flask-cv2-app"
-        IMAGE_TAG = "latest"
-        DOCKER_CREDS = "dockerhub-creds"   // create in Jenkins → Credentials
+        REPO_URL = 'https://github.com/shubhammks/sketch_using_flask_cv2_html.git'
+        BRANCH = 'main'
+        IMAGE_NAME = 'flask_sketch_app'
     }
 
     stages {
-        stage('Checkout') {
+
+        stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/shubhammks/sketch_using_flask_cv2_html.git'
+                echo '📥 Cloning repository...'
+                git branch: "${BRANCH}", credentialsId: 'github-token', url: "${REPO_URL}"
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                }
+                echo '🐳 Building Docker image...'
+                sh 'docker build -t ${IMAGE_NAME}:latest .'
             }
         }
 
         stage('Run Tests') {
             steps {
-                script {
-                    echo "✅ No unit tests configured for this project"
-                }
-            }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
-                            docker push $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
-                            docker logout
-                        '''
-                    }
-                }
+                echo '🧪 Running tests (if any)...'
+                // Optional: run python tests if available
+                sh '''
+                    if [ -f "test_app.py" ]; then
+                        echo "Running Python tests..."
+                        python3 -m unittest discover
+                    else
+                        echo "No test file found, skipping..."
+                    fi
+                '''
             }
         }
 
         stage('Deploy Locally') {
             steps {
-                script {
-                    sh '''
-                        docker rm -f flask-cv2-container || true
-                        docker run -d --name flask-cv2-container -p 5000:5000 ${IMAGE_NAME}:${IMAGE_TAG}
-                    '''
-                }
+                echo '🚀 Deploying container locally...'
+                // Stop and remove any old container first
+                sh '''
+                    docker ps -q --filter "name=flask_app" | grep -q . && docker stop flask_app && docker rm flask_app || true
+                    docker run -d -p 5000:5000 --name flask_app ${IMAGE_NAME}:latest
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "🎉 Build, Push & Deploy completed successfully!"
+            echo '✅ Deployment Successful! Flask app running at http://localhost:5000'
         }
         failure {
-            echo "❌ Pipeline failed. Check console logs."
+            echo '❌ Build or Deployment Failed. Check logs.'
         }
     }
 }
