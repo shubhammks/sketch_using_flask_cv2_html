@@ -1,38 +1,42 @@
 <div class="container">
 
-    <div><img src="../tmp/image.jpg" alt=""></div>
-   <div>
-  <img src="{{ url_for('tmp', filename=img1) }}" alt="Result">
+  <!-- Original uploaded image -->
+  <div>
+    <h3>Original Image</h3>
+    <img src="{{ url_for('tmp', filename='image.jpg') }}" alt="Original Image">
+  </div>
+
+  <!-- Processed sketch image -->
+  <div>
+    <h3>Sketch Result</h3>
+    <img src="{{ url_for('tmp', filename=img1) }}" alt="Result Image">
+  </div>
+
 </div>
 
-
-</div>
 <style>
-    .container {
-        background-color: #f0f0f0;
-        /* height: 100vh; */
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        
-    }
-    div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 20px;
-        padding: 0px;
-        border: 2px solid black;
-        /* width:100vw; */
-        /* height: auto; */
-    }
+  .container {
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+  }
 
-    img {
-        max-width: 600px;
-        max-height: 700px;
-        border: 2px solid black;
-        /* margin: 10px; */
-        object-fit: fill;
-    }
+  div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 20px;
+      padding: 10px;
+      border: 2px solid black;
+  }
+
+  img {
+      max-width: 600px;
+      max-height: 700px;
+      border: 2px solid black;
+      object-fit: fill;
+  }
 </style>
