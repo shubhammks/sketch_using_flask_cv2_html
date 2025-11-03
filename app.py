@@ -11,7 +11,7 @@ def index():
 def submit():
 
     image = request.files['image']
-    image.save('static/' + 'image.jpg')
+    image.save('/tmp/image.jpg')
 
     image= cv2.imread('static/image.jpg')
     gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -24,7 +24,7 @@ def submit():
     sharp_skech=cv2.filter2D(skech,-1,kernal_sharpen)
 
     # showimg(sharp_skech)
-    cv2.imwrite('static/final.jpg', sharp_skech)
+    cv2.imwrite('/tmp/final.jpg', sharp_skech)
     # img="static/image.jpg"
 
     return rt('result.html', img1="final.jpg")
